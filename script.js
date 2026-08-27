@@ -6,11 +6,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const loader = document.getElementById("loader");
 
-    window.addEventListener("load", () => {
+    function hideLoader() {
+        if (!loader) return;
+
         setTimeout(() => {
-            loader?.classList.add("hide");
+            loader.classList.add("hide");
         }, 700);
-    });
+    }
+
+    if (document.readyState === "complete") {
+        hideLoader();
+    } else {
+        window.addEventListener("load", hideLoader, { once: true });
+    }
 
 
     /* =========================================================
@@ -18,16 +26,17 @@ document.addEventListener("DOMContentLoaded", () => {
     ========================================================= */
 
     const startButton = document.getElementById("startButton");
+    const messageSection = document.getElementById("message");
 
     startButton?.addEventListener("click", () => {
-        const messageSection = document.getElementById("message");
 
-        if (messageSection) {
-            messageSection.scrollIntoView({
-                behavior: "smooth",
-                block: "start"
-            });
-        }
+        if (!messageSection) return;
+
+        messageSection.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+
     });
 
 
@@ -37,27 +46,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const revealElements = document.querySelectorAll(".reveal");
 
-    if ("IntersectionObserver" in window) {
+    if (
+        "IntersectionObserver" in window &&
+        revealElements.length
+    ) {
 
         const revealObserver = new IntersectionObserver(
             (entries, observer) => {
 
                 entries.forEach((entry) => {
 
-                    if (entry.isIntersecting) {
+                    if (!entry.isIntersecting) return;
 
-                        entry.target.classList.add("active");
+                    entry.target.classList.add("active");
 
-                        observer.unobserve(entry.target);
-
-                    }
+                    observer.unobserve(entry.target);
 
                 });
 
             },
             {
                 threshold: 0.12,
-                rootMargin: "0px 0px -40px 0px"
+                rootMargin: "0px 0px -45px 0px"
             }
         );
 
@@ -75,29 +85,35 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =========================================================
-       CURSOR GLOW — DESKTOP ONLY
+       CURSOR GLOW
+       DESKTOP ONLY
     ========================================================= */
 
     const cursorGlow = document.querySelector(".cursor-glow");
 
-    const desktopPointer =
-        window.matchMedia("(hover:hover) and (pointer:fine)");
+    const desktopPointer = window.matchMedia(
+        "(hover:hover) and (pointer:fine)"
+    );
 
     if (cursorGlow && desktopPointer.matches) {
 
-        let mouseX = 0;
-        let mouseY = 0;
+        let mouseX = window.innerWidth / 2;
+        let mouseY = window.innerHeight / 2;
 
-        let currentX = 0;
-        let currentY = 0;
+        let currentX = mouseX;
+        let currentY = mouseY;
 
         window.addEventListener(
             "mousemove",
             (event) => {
+
                 mouseX = event.clientX;
                 mouseY = event.clientY;
+
             },
-            { passive: true }
+            {
+                passive: true
+            }
         );
 
         function animateCursor() {
@@ -105,8 +121,8 @@ document.addEventListener("DOMContentLoaded", () => {
             currentX += (mouseX - currentX) * 0.08;
             currentY += (mouseY - currentY) * 0.08;
 
-            cursorGlow.style.left = `${currentX}px`;
-            cursorGlow.style.top = `${currentY}px`;
+            cursorGlow.style.transform =
+                `translate3d(${currentX}px, ${currentY}px, 0) translate(-50%, -50%)`;
 
             requestAnimationFrame(animateCursor);
         }
@@ -124,118 +140,130 @@ document.addEventListener("DOMContentLoaded", () => {
        INTERACTIVE MESSAGE
     ========================================================= */
 
-    const messageButton = document.getElementById("messageButton");
-    const messageText = document.getElementById("messageText");
-    const messageCount = document.getElementById("messageCount");
+    const messageButton =
+        document.getElementById("messageButton");
+
+    const messageText =
+        document.getElementById("messageText");
+
+    const messageCount =
+        document.getElementById("messageCount");
+
 
     const messages = [
-    "Heru Handika, sayangku.",
 
-    "Manisku, cowokku, kesayanganku.",
+        "Heru Handika, sayangku.",
 
-    "Kamu adalah orang ketiga yang paling aku sayang.",
+        "Manisku, cowokku, kesayanganku.",
 
-    "Setelah ayah dan kakekku, kamu salah satu yang paling aku cinta,.",
+        "Kamu adalah orang ketiga yang paling aku sayang.",
 
-    "Sayangkuuu... aku kangen banget sama kamu.",
+        "Setelah ayah dan kakekku, kamu salah satu yang paling aku cinta.",
 
-    "Aku pengen banget ketemu sama kamu, sayang.",
+        "Sayangkuuu... aku kangen banget sama kamu.",
 
-    "Aku pengen peluk kamu, pengen cium kamu, pengen rasain kamu ada di dekat aku.",
+        "Aku pengen banget ketemu sama kamu, sayang.",
 
-    "Andai sayang tahu seberapa sering aku nungguin kamu.",
+        "Aku pengen peluk kamu, pengen cium kamu, pengen rasain kamu ada di dekat aku.",
 
-    "Tiap hari aku masih menghitung hari di kalender, sambil berharap hari kita ketemu semakin dekat.",
+        "Andai sayang tahu seberapa sering aku nungguin kamu.",
 
-    "Kadang aku lihat kalender lama banget, sampai tanpa sadar air mata aku jatuh.",
+        "Tiap hari aku masih menghitung hari di kalender, sambil berharap hari kita ketemu semakin dekat.",
 
-    "Aku juga sering tiba-tiba nangis waktu lagi salat, karena kepikiran kamu.",
+        "Kadang aku lihat kalender lama banget, sampai tanpa sadar air mata aku jatuh.",
 
-    "Lagi kerja di kantor pun kadang aku tiba-tiba nangis karena kangen kamu.",
+        "Aku juga sering tiba-tiba nangis waktu lagi salat, karena kepikiran kamu.",
 
-    "Padahal aku lagi berusaha fokus kerja, tapi tiba-tiba pikiran aku pergi ke kamu.",
+        "Lagi kerja di kantor pun kadang aku tiba-tiba nangis karena kangen kamu.",
 
-    "Kadang aku cuma diam sambil lihat HP, berharap tiba-tiba nama kamu muncul.",
+        "Padahal aku lagi berusaha fokus kerja, tapi tiba-tiba pikiran aku pergi ke kamu.",
 
-    "Berharap tiba-tiba kamu kasih kabar.",
+        "Kadang aku cuma diam sambil lihat HP, berharap tiba-tiba nama kamu muncul.",
 
-    "Berharap tiba-tiba kamu bilang kalau kamu juga kangen.",
+        "Berharap tiba-tiba kamu kasih kabar.",
 
-    "Aku sering bertanya-tanya, kapan ya kita bisa ketemu lagi?",
+        "Berharap tiba-tiba kamu bilang kalau kamu juga kangen.",
 
-    "Aku masih nungguin kamu, sayang.",
+        "Aku sering bertanya-tanya, kapan ya kita bisa ketemu lagi?",
 
-    "Walaupun aku nggak tahu kapan kamu akan datang.",
+        "Aku masih nungguin kamu, sayang.",
 
-    "Walaupun aku nggak tahu kapan kita bisa ketemu lagi.",
+        "Walaupun aku nggak tahu kapan kamu akan datang.",
 
-    "Aku tetap berharap suatu hari nanti kamu tiba-tiba muncul.",
+        "Walaupun aku nggak tahu kapan kita bisa ketemu lagi.",
 
-    "Tiba-tiba bilang kalau kamu kangen aku juga.",
+        "Aku tetap berharap suatu hari nanti kamu tiba-tiba muncul.",
 
-    "Tiba-tiba bilang kalau kamu pengen ketemu aku.",
+        "Tiba-tiba bilang kalau kamu kangen aku juga.",
 
-    "Karena sejujurnya, aku cuma pengen satu hal.",
+        "Tiba-tiba bilang kalau kamu pengen ketemu aku.",
 
-    "Aku pengen ketemu kamu dan peluk kamu lama banget.",
+        "Karena sejujurnya, aku cuma pengen satu hal.",
 
-    "Aku kangen kamu setiap hari.",
+        "Aku pengen ketemu kamu dan peluk kamu lama banget.",
 
-    "Kangen kamu setiap malam.",
+        "Aku kangen kamu setiap hari.",
 
-    "Kangen kamu bahkan di saat-saat yang nggak terduga.",
+        "Kangen kamu setiap malam.",
 
-    "Dan sampai sekarang...",
+        "Kangen kamu bahkan di saat-saat yang nggak terduga.",
 
-    "aku masih nunggu kamu.",
+        "Dan sampai sekarang...",
 
-    "Masih menghitung hari sampai kita ketemu.",
+        "aku masih nunggu kamu.",
 
-    "Masih berharap kamu datang.",
+        "Masih menghitung hari sampai kita ketemu.",
 
-    "Masih berharap kamu kasih kabar.",
+        "Masih berharap kamu datang.",
 
-    "Masih berharap kita bisa ketemu lagi.",
+        "Masih berharap kamu kasih kabar.",
 
-    "Heru Handika, sayangku...",
+        "Masih berharap kita bisa ketemu lagi.",
 
-    "Kalau kamu tahu aku sekangen ini sama kamu.",
+        "Heru Handika, sayangku...",
 
-    "Aku cuma pengen kamu tahu satu hal.",
+        "Kalau kamu tahu aku sekangen ini sama kamu.",
 
-    "Aku masih di sini.",
+        "Aku cuma pengen kamu tahu satu hal.",
 
-    "Masih kangen.",
+        "Aku masih di sini.",
 
-    "Masih nunggu kamu.",
+        "Masih kangen.",
 
-    "Dan masih sayang kamu."
-];
+        "Masih nunggu kamu.",
+
+        "Dan masih sayang kamu.",
+
+        "Tunggu aku pulang ya."
+
+    ];
+
 
     let currentMessage = 0;
     let isChangingMessage = false;
 
-    function showMessage(index) {
+
+    function updateMessage(index) {
 
         if (!messageText || !messageCount) return;
 
-        const newText = messages[index];
+        const text = messages[index];
 
-        messageText.style.opacity = "0";
-        messageText.style.transform = "translateY(12px)";
+        messageText.classList.add("changing");
 
         setTimeout(() => {
 
-            messageText.textContent = newText;
+            messageText.textContent = text;
 
             messageCount.textContent =
                 String(index + 1).padStart(2, "0");
 
-            messageText.style.opacity = "1";
-            messageText.style.transform = "translateY(0)";
+            messageText.classList.remove("changing");
 
         }, 220);
+
     }
+
 
     messageButton?.addEventListener("click", () => {
 
@@ -249,7 +277,7 @@ document.addEventListener("DOMContentLoaded", () => {
             currentMessage = 0;
         }
 
-        showMessage(currentMessage);
+        updateMessage(currentMessage);
 
         setTimeout(() => {
             isChangingMessage = false;
@@ -259,12 +287,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =========================================================
-       VIDEO
-       Pastikan hanya video yang sedang dimainkan
-       yang aktif.
+       VIDEO SYSTEM
+       HANYA SATU VIDEO BOLEH PLAY
     ========================================================= */
 
-    const videos = document.querySelectorAll(".our-video");
+    const videos =
+        document.querySelectorAll(".our-video");
+
 
     videos.forEach((video) => {
 
@@ -284,30 +313,37 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =========================================================
-       PAUSE VIDEO SAAT KELUAR VIEW
-       Supaya HP lebih ringan.
+       PAUSE VIDEO SAAT TIDAK TERLIHAT
+       MOBILE FRIENDLY
     ========================================================= */
 
-    if ("IntersectionObserver" in window && videos.length) {
+    if (
+        "IntersectionObserver" in window &&
+        videos.length
+    ) {
 
-        const videoObserver = new IntersectionObserver(
-            (entries) => {
+        const videoObserver =
+            new IntersectionObserver(
+                (entries) => {
 
-                entries.forEach((entry) => {
+                    entries.forEach((entry) => {
 
-                    const video = entry.target;
+                        const video = entry.target;
 
-                    if (!entry.isIntersecting && !video.paused) {
-                        video.pause();
-                    }
+                        if (
+                            !entry.isIntersecting &&
+                            !video.paused
+                        ) {
+                            video.pause();
+                        }
 
-                });
+                    });
 
-            },
-            {
-                threshold: 0.15
-            }
-        );
+                },
+                {
+                    threshold: 0.15
+                }
+            );
 
         videos.forEach((video) => {
             videoObserver.observe(video);
@@ -317,19 +353,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =========================================================
-       IMAGE LOAD ERROR
-       Kalau foto tidak ditemukan, tetap tampil rapi.
+       IMAGE ERROR HANDLER
     ========================================================= */
 
-    const images = document.querySelectorAll(".memory-card img");
+    const images =
+        document.querySelectorAll(".memory-card img");
+
 
     images.forEach((image) => {
 
         image.addEventListener("error", () => {
 
+            image.classList.add("image-failed");
+
             image.style.opacity = "0";
 
-            image.parentElement.classList.add("image-error");
+            image.parentElement?.classList.add(
+                "image-error"
+            );
 
         });
 
@@ -340,37 +381,47 @@ document.addEventListener("DOMContentLoaded", () => {
        ESCAPE KEY
     ========================================================= */
 
-    document.addEventListener("keydown", (event) => {
+    document.addEventListener(
+        "keydown",
+        (event) => {
 
-        if (event.key === "Escape") {
+            if (event.key !== "Escape") return;
 
             videos.forEach((video) => {
                 video.pause();
             });
 
         }
-
-    });
+    );
 
 
     /* =========================================================
        MOBILE VIDEO OPTIMIZATION
     ========================================================= */
 
+    const mobileQuery =
+        window.matchMedia("(max-width:700px)");
+
+
     function optimizeMobileVideos() {
 
-        const isMobile = window.matchMedia(
-            "(max-width:700px)"
-        ).matches;
+        const isMobile = mobileQuery.matches;
 
         videos.forEach((video) => {
+
+            video.setAttribute(
+                "playsinline",
+                ""
+            );
 
             if (isMobile) {
 
                 video.setAttribute(
-                    "playsinline",
-                    ""
+                    "preload",
+                    "metadata"
                 );
+
+            } else {
 
                 video.setAttribute(
                     "preload",
@@ -383,36 +434,129 @@ document.addEventListener("DOMContentLoaded", () => {
 
     }
 
+
     optimizeMobileVideos();
 
-    window.addEventListener(
-        "resize",
-        optimizeMobileVideos,
-        { passive: true }
-    );
+
+    if (mobileQuery.addEventListener) {
+
+        mobileQuery.addEventListener(
+            "change",
+            optimizeMobileVideos
+        );
+
+    } else {
+
+        window.addEventListener(
+            "resize",
+            optimizeMobileVideos,
+            {
+                passive: true
+            }
+        );
+
+    }
 
 
     /* =========================================================
-       PREVENT ACCIDENTAL DOUBLE TAP ZOOM ON BUTTONS
+       BUTTON TOUCH FEEDBACK
     ========================================================= */
 
-    const buttons = document.querySelectorAll("button");
+    const buttons =
+        document.querySelectorAll("button");
+
 
     buttons.forEach((button) => {
 
         button.addEventListener(
             "touchstart",
-            () => {},
-            { passive: true }
+            () => {
+                button.classList.add("touching");
+            },
+            {
+                passive: true
+            }
+        );
+
+        button.addEventListener(
+            "touchend",
+            () => {
+                button.classList.remove("touching");
+            },
+            {
+                passive: true
+            }
+        );
+
+        button.addEventListener(
+            "touchcancel",
+            () => {
+                button.classList.remove("touching");
+            },
+            {
+                passive: true
+            }
         );
 
     });
 
 
     /* =========================================================
-       YEAR / PAGE READY
+       PREVENT DOUBLE TAP DELAY
     ========================================================= */
 
-    document.documentElement.classList.add("page-ready");
+    buttons.forEach((button) => {
+
+        button.style.touchAction = "manipulation";
+
+    });
+
+
+    /* =========================================================
+       LAZY IMAGE SAFETY
+    ========================================================= */
+
+    images.forEach((image) => {
+
+        if (!image.hasAttribute("loading")) {
+            image.setAttribute("loading", "lazy");
+        }
+
+        if (!image.hasAttribute("decoding")) {
+            image.setAttribute("decoding", "async");
+        }
+
+    });
+
+
+    /* =========================================================
+       PAGE READY
+    ========================================================= */
+
+    document.documentElement.classList.add(
+        "page-ready"
+    );
+
+
+    /* =========================================================
+       CLEANUP BEFORE PAGE HIDDEN
+    ========================================================= */
+
+    document.addEventListener(
+        "visibilitychange",
+        () => {
+
+            if (document.hidden) {
+
+                videos.forEach((video) => {
+                    if (!video.paused) {
+                        video.pause();
+                    }
+                });
+
+            }
+
+        }
+    );
 
 });
